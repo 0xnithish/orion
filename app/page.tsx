@@ -1,18 +1,11 @@
 "use client"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
+import { ChatInterface } from "@/components/chat-interface"
+import { LayoutHeader } from "@/components/layout-header"
 
 export default function HomePage() {
-  const router = useRouter()
   const { isLoading, isAuthenticated } = useAuth()
-
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.push("/chat")
-    }
-  }, [isLoading, isAuthenticated, router])
 
   if (isLoading) {
     return (
@@ -25,5 +18,16 @@ export default function HomePage() {
     )
   }
 
-  return null
+  if (!isAuthenticated) {
+    return null
+  }
+
+  return (
+    <div className="flex h-full flex-col">
+      <LayoutHeader />
+      <div className="flex-1 overflow-hidden">
+        <ChatInterface chatId={null} />
+      </div>
+    </div>
+  )
 }

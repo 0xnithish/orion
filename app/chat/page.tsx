@@ -1,10 +1,14 @@
 "use client"
 
 import { useAuth } from "@/hooks/use-auth"
+import { useSearchParams } from "next/navigation"
 import { ChatInterface } from "@/components/chat-interface"
+import { LayoutHeader } from "@/components/layout-header"
 
 export default function ChatPage() {
   const { isLoading, isAuthenticated } = useAuth()
+  const searchParams = useSearchParams()
+  const chatId = searchParams.get('id')
 
   if (isLoading) {
     return (
@@ -21,5 +25,12 @@ export default function ChatPage() {
     return null
   }
 
-  return <ChatInterface />
+  return (
+    <div className="flex h-full flex-col">
+      <LayoutHeader />
+      <div className="flex-1 overflow-hidden">
+        <ChatInterface chatId={chatId} />
+      </div>
+    </div>
+  )
 }

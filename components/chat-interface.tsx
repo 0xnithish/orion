@@ -6,20 +6,13 @@ import { Send, Bot, User, Copy, Check, Paperclip, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/hooks/use-auth"
 import { toast } from "sonner"
+import { useChatStore, type Message } from "@/hooks/use-chat-store"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-
-interface Message {
-  id: string
-  role: "user" | "assistant"
-  content: string
-  timestamp: Date
-  image?: string
-}
 
 const dummyResponses = [
   "That's an interesting question! Based on my analysis, I would suggest exploring multiple approaches to find the best solution.",
@@ -39,15 +32,16 @@ const suggestionPrompts = [
   "What is the weather in San Francisco?",
 ]
 
-const formatTimestamp = (date: Date): string => {
+const formatTimestamp = (date: Date | string): string => {
   const now = new Date()
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+  const messageDate = typeof date === 'string' ? new Date(date) : date
+  const diffInSeconds = Math.floor((now.getTime() - messageDate.getTime()) / 1000)
 
   if (diffInSeconds < 60) return "Just now"
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`
 
-  return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+  return messageDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
 }
 
 const generateDummyMessages = (count: number, startId: number): Message[] => {
@@ -77,12 +71,19 @@ const generateDummyMessages = (count: number, startId: number): Message[] => {
   return messages
 }
 
-export function ChatInterface() {
+interface ChatInterfaceProps {
+  chatId?: string | null
+}
+
+export function ChatInterface({ chatId }: ChatInterfaceProps) {
   const { getAuthData } = useAuth()
   const authData = getAuthData()
   const userName = authData?.name || "User"
 
+  const { getChatById, updateChat, setCurrentChat, currentChatId, createChat } = useChatStore()
+
   const [messages, setMessages] = useState<Message[]>([])
+  const [activeChatId, setActiveChatId] = useState<string | null>(null)
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [page, setPage] = useState(1)
@@ -100,9 +101,48 @@ export function ChatInterface() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
+  // Load chat on mount or when chatId changes
+  useEffect(() => {
+    if (chatId) {
+      const chat = getChatById(chatId)
+      if (chat) {
+        setMessages(chat.messages)
+        setActiveChatId(chatId)
+        setCurrentChat(chatId)
+      }
+    } else {
+      // No chatId, start fresh
+      setMessages([])
+      setActiveChatId(null)
+    }
+  }, [chatId, getChatById, setCurrentChat])
+
+  // Save messages to store whenever they change
+  useEffect(() => {
+    if (activeChatId && messages.length > 0) {
+      updateChat(activeChatId, messages)
+    }
+  }, [messages, activeChatId, updateChat])
+
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    textarea.style.height = "auto"
+    const newHeight = textarea.scrollHeight
+    textarea.style.height = `${newHeight}px`
+
+    // Show scrollbar only when max height is reached
+    if (newHeight >= 200) {
+      textarea.style.overflow = "auto"
+    } else {
+      textarea.style.overflow = "hidden"
+    }
+  }, [input])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -184,6 +224,16 @@ export function ChatInterface() {
   const sendMessage = (content: string) => {
     if ((!content.trim() && !uploadedImage) || isLoading) return
 
+    // Create new chat if none exists
+    if (!activeChatId) {
+      const newChatId = createChat()
+      setActiveChatId(newChatId)
+      // Update URL without reload
+      if (typeof window !== 'undefined') {
+        window.history.pushState({}, '', `/chat?id=${newChatId}`)
+      }
+    }
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -231,6 +281,7 @@ export function ChatInterface() {
       e.preventDefault()
       sendMessage(input)
     }
+    // Shift+Enter creates new lines
   }
 
   return (
@@ -245,24 +296,12 @@ export function ChatInterface() {
             )}
 
             {messages.length === 0 && !isLoading ? (
-            <div className="flex min-h-[60vh] flex-col items-center justify-center space-y-8">
+            <div className="flex min-h-[60vh] flex-col items-center justify-center">
               <div className="space-y-2 text-center">
-                <h1 className="text-4xl font-bold">Hello there!</h1>
+                <h1 className="text-4xl font-bold">Hello {userName}!</h1>
                 <p className="text-lg text-muted-foreground">
-                  How can I help you today?
+                  What should we do today?
                 </p>
-              </div>
-
-              <div className="grid w-full max-w-2xl grid-cols-1 gap-3 md:grid-cols-2">
-                {suggestionPrompts.map((prompt, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleSuggestionClick(prompt)}
-                    className="rounded-lg border border-border bg-background px-4 py-3 text-left text-sm transition-colors hover:bg-accent"
-                  >
-                    {prompt}
-                  </button>
-                ))}
               </div>
             </div>
           ) : (
@@ -361,7 +400,7 @@ export function ChatInterface() {
         </div>
       </div>
 
-        <div className="border-t bg-background px-4 py-4">
+        <div className="bg-background px-4 py-4">
           <form onSubmit={handleSubmit} className="mx-auto max-w-3xl">
             {uploadedImage && (
               <div className="mb-3 relative inline-block">
@@ -415,7 +454,8 @@ export function ChatInterface() {
                 placeholder="Send a message..."
                 disabled={isLoading}
                 rows={1}
-                className="min-h-[44px] max-h-[200px] flex-1 resize-none rounded-lg border border-input bg-background px-4 py-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+                style={{ overflow: 'hidden' }}
+                className="max-h-[200px] flex-1 resize-none rounded-lg border border-input bg-background px-4 py-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
               />
               <Button
                 type="submit"

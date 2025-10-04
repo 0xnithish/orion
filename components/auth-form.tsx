@@ -162,7 +162,6 @@ export default function AuthForm() {
 
       if (values.otp === generatedOtp) {
         setAuthData({ ...pendingAuth, otp: generatedOtp, isAuthenticated: true })
-        showAlert('Success', 'Login successful!')
         setPendingAuth(null)
         setTimeout(() => router.push('/'), 1200)
       } else {
