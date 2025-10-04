@@ -43,7 +43,7 @@ export function AppSidebar() {
   const { isAuthenticated, logout, getAuthData } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const currentChatId = searchParams.get('id')
+  const currentChatId = searchParams?.get('id') || null
   
   const { getRecentChats, createChat, deleteChat, chats } = useChatStore()
   const recentChats = getRecentChats()

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -33,7 +34,9 @@ export default function RootLayout({
         <ThemeProvider>
           <SidebarProvider defaultOpen={true}>
             <div className="flex h-full w-full overflow-hidden">
-              <AppSidebar />
+              <Suspense fallback={<div className="w-[10rem]" />}>
+                <AppSidebar />
+              </Suspense>
               <div className="flex flex-1 flex-col overflow-hidden bg-background min-w-0">
                 <main className="flex-1 overflow-auto">{children}</main>
               </div>
