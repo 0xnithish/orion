@@ -26,15 +26,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-screen w-screen" suppressHydrationWarning>
+    <html lang="en" className="h-full w-full" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans h-screen w-screen overflow-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans h-full w-full overflow-hidden`}
       >
         <ThemeProvider>
           <SidebarProvider defaultOpen={true}>
-            <div className="flex h-screen w-screen overflow-hidden">
+            <div className="flex h-full w-full overflow-hidden">
               <AppSidebar />
-              <div className="flex flex-1 flex-col overflow-hidden bg-background">
+              <div className="flex flex-1 flex-col overflow-hidden bg-background min-w-0">
                 <main className="flex-1 overflow-auto">{children}</main>
               </div>
             </div>

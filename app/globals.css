@@ -116,30 +116,35 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  
   body {
     @apply bg-background text-foreground;
     margin: 0;
     padding: 0;
-    min-height: 100vh;
-    min-width: 100vw;
-  }
-  html {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    min-width: 100vw;
+    height: 100%;
+    width: 100vw;
+    /* Fix for mobile browsers with address bars */
+    height: 100dvh;
+    overflow: hidden;
+    position: relative;
   }
 
   /* Ensure sidebar components span full height */
   [data-slot="sidebar-wrapper"] {
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
   }
 
   /* Fix any potential overflow issues */
   .group[data-slot="sidebar-wrapper"] {
-    height: 100vh !important;
-    width: 100vw !important;
+    height: 100% !important;
   }
 
   /* Custom scrollbar styling */

@@ -109,11 +109,13 @@ export function ChatInterface({ chatId }: ChatInterfaceProps) {
         setMessages(chat.messages)
         setActiveChatId(chatId)
         setCurrentChat(chatId)
+        setHasMore(false) // Don't load dummy messages for existing chats
       }
     } else {
-      // No chatId, start fresh
+      // No chatId, start fresh with empty messages
       setMessages([])
       setActiveChatId(null)
+      setHasMore(false) // Don't load dummy messages
     }
   }, [chatId, getChatById, setCurrentChat])
 
