@@ -77,7 +77,7 @@ A modern, feature-rich AI chatbot interface built with Next.js 15, TypeScript, a
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/0xnithish/orion
 cd orion
 ```
 
