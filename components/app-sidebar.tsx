@@ -18,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Home, Search, User, Settings, LogOut } from "lucide-react"
+import { Home, Search, MessageSquare, User, Settings, LogOut, SquarePen } from "lucide-react"
 
 export function AppSidebar() {
   const { isAuthenticated, logout, getAuthData } = useAuth()
@@ -41,14 +41,18 @@ export function AppSidebar() {
           </button>
         </div>
       </SidebarHeader>
+
       <SidebarContent>
-        <SidebarMenu>
+        <SidebarMenu className="px-2">
           <SidebarMenuItem>
-            <SidebarMenuButton>
+            <SidebarMenuButton onClick={() => router.push("/chat")}>
+              <SquarePen className="h-4 w-4" />
+              <span>New Chat</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
+
       <SidebarFooter>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
