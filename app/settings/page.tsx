@@ -89,7 +89,7 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <Button onClick={handleSave} disabled={isSaving}>
+                <Button onClick={handleSave} disabled={isSaving} variant="default">
                   {isSaving ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
