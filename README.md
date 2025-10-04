@@ -1,6 +1,6 @@
 # Orion - AI Chat Application
 
-A modern, feature-rich AI chatbot interface built with Next.js 15, TypeScript, and shadcn/ui. Experience seamless conversations with an elegant UI inspired by ChatGPT and Claude.
+A modern, feature-rich AI chatbot interface built with Next.js 15, TypeScript, and shadcn/ui. Experience seamless conversations with an elegant UI inspired by Gemini and Grok.
 
 ## 🚀 Live Demo
 
